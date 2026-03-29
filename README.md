@@ -62,15 +62,9 @@ When NaN or Inf appears in the loss value, the wrapper:
 ## Installation
 
 ```bash
-pip install nan-safe-trainer
-```
-
-Or from source:
-
-```bash
 git clone https://github.com/cjchanh/nan-safe-trainer.git
 cd nan-safe-trainer
-pip install -e ".[dev]"
+pip install -e .
 ```
 
 You also need MLX for the actual training:
@@ -107,7 +101,7 @@ python -m nan_safe_trainer --config config.yaml --experts my_expert --data-dir .
 | `--adapter-dir` | no | `./adapters` | Base adapter output directory |
 | `--save-every` | no | `30` | Checkpoint interval (iterations) |
 | `--max-seed-attempts` | no | `5` | Max retries per expert before giving up |
-| `--threshold` | no | `3.0` | Validation loss threshold for success |
+| `--threshold` | no | disabled | Validation loss threshold for success (fail-closed: fails if no val loss logged) |
 | `--seed` | no | from config | Override the base seed |
 | `--receipt-path` | no | `./nan_safe_receipt.json` | Path for the JSON receipt |
 | `--trainer-cmd` | no | `python -m mlx_lm.lora` | Training command (wrapper appends `--config <path>`) |
@@ -184,29 +178,21 @@ Every run writes a structured JSON receipt documenting:
 }
 ```
 
-## Companion Tools
+## Extras
 
-### filter
+The package also includes optional utilities (not part of the core training loop):
 
-Pre-filters training data by running a forward pass on each row and removing
-any that produce NaN loss. Use this before training to clean your dataset:
+- `nan_safe_trainer.filter` — Pre-filter training data rows that produce NaN on forward pass. Requires `mlx` and `mlx-lm`.
+- `nan_safe_trainer.metal` — Metal GPU memory governance for MLX (set memory/cache limits by profile).
+- `nan_safe_trainer.receipt` — Typed dataclasses (`TrainingReceipt`, `ExpertResult`, `AttemptRecord`) for deserializing receipt files.
 
-```python
-from nan_safe_trainer.filter import main as filter_main
-# Or run directly:
-# python -c "from nan_safe_trainer.filter import main; main()" --model ... --input ... --output ...
-```
+## Development
 
-Requires `mlx` and `mlx-lm`.
-
-### metal
-
-Metal GPU memory governance for MLX. Import before loading models to set
-memory and cache limits by profile (`training`, `inference`, `light`):
-
-```python
-from nan_safe_trainer.metal import init_metal
-init_metal(profile="training")  # 80GB memory, 4GB cache
+```bash
+make install   # pip install -e ".[dev]"
+make test      # pytest
+make build     # wheel + sdist
+make check     # build + twine check
 ```
 
 ## What This Does NOT Do

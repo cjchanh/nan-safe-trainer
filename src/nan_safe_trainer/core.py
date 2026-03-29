@@ -405,11 +405,19 @@ def train_one_expert(
             expert_receipt["best_checkpoint_iter"] = target_iters
             expert_receipt["resume_checkpoint_iter"] = attempt["resume_from_iter"]
             best_val = attempt.get("best_logged_val_loss")
-            if best_val is not None and best_val >= args.threshold:
-                expert_receipt["status"] = "failed"
-                expert_receipt["failure_reason"] = (
-                    f"best val_loss {best_val:.3f} did not beat threshold {args.threshold:.3f}"
-                )
+            if args.threshold < float("inf"):
+                if best_val is None:
+                    expert_receipt["status"] = "failed"
+                    expert_receipt["failure_reason"] = (
+                        f"--threshold {args.threshold:.3f} set but no validation loss was logged"
+                    )
+                elif best_val >= args.threshold:
+                    expert_receipt["status"] = "failed"
+                    expert_receipt["failure_reason"] = (
+                        f"best val_loss {best_val:.3f} did not beat threshold {args.threshold:.3f}"
+                    )
+                else:
+                    expert_receipt["status"] = "completed"
             else:
                 expert_receipt["status"] = "completed"
             expert_receipt["final_val_loss"] = best_val
@@ -452,7 +460,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--adapter-dir", default="./adapters", help="Base adapter output directory (default: ./adapters)")
     parser.add_argument("--save-every", type=int, default=30, help="Checkpoint save interval in iterations")
     parser.add_argument("--max-seed-attempts", type=int, default=5, help="Max retry attempts per expert before giving up")
-    parser.add_argument("--threshold", type=float, default=3.0, help="Validation loss threshold for success")
+    parser.add_argument("--threshold", type=float, default=float("inf"),
+                        help="Validation loss threshold for success (default: disabled)")
     parser.add_argument("--seed", type=int, default=None, help="Override base seed from config")
     parser.add_argument("--receipt-path", type=Path, default=DEFAULT_RECEIPT, help="Path to write the JSON receipt")
     parser.add_argument(
