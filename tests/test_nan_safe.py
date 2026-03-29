@@ -200,6 +200,92 @@ class TestSeedRotation:
 # --- Integration (mocked subprocess) ---
 
 
+class TestThresholdGating:
+    def test_threshold_gates_completion(self, tmp_path):
+        """Training completes but val loss exceeds threshold → status=failed."""
+        import argparse
+        from train_nan_safe import train_one_expert
+
+        args = argparse.Namespace(
+            config=tmp_path / "config.yaml",
+            experts=["test_expert"],
+            data_dir=str(tmp_path / "data"),
+            adapter_dir=str(tmp_path / "adapters"),
+            save_every=10,
+            max_seed_attempts=2,
+            threshold=2.0,
+            seed=42,
+            receipt_path=tmp_path / "receipt.json",
+            trainer_cmd=["/bin/echo", "done"],
+            resume_existing=False,
+        )
+        (tmp_path / "config.yaml").write_text("model: test\niters: 100\nseed: 42\nsave_every: 10\n")
+        (tmp_path / "data" / "test_expert").mkdir(parents=True)
+
+        receipt: dict = {"experts": {}}
+
+        with mock.patch("train_nan_safe.run_training_attempt") as mock_run:
+            mock_run.return_value = {
+                "status": "completed",
+                "nan_detected": False,
+                "resume_from_iter": 0,
+                "best_logged_val_loss": 2.5,
+                "finished_at": "2026-01-01T00:00:00+00:00",
+            }
+            result = train_one_expert(
+                expert="test_expert",
+                args=args,
+                base_config={"iters": 100, "seed": 42, "save_every": 10},
+                receipt=receipt,
+                workspace=tmp_path / "workspace",
+            )
+
+        assert result["status"] == "failed"
+        assert "threshold" in result["failure_reason"]
+
+    def test_threshold_passes_when_under(self, tmp_path):
+        """Training completes with val loss under threshold → status=completed."""
+        import argparse
+        from train_nan_safe import train_one_expert
+
+        args = argparse.Namespace(
+            config=tmp_path / "config.yaml",
+            experts=["test_expert"],
+            data_dir=str(tmp_path / "data"),
+            adapter_dir=str(tmp_path / "adapters"),
+            save_every=10,
+            max_seed_attempts=2,
+            threshold=3.0,
+            seed=42,
+            receipt_path=tmp_path / "receipt.json",
+            trainer_cmd=["/bin/echo", "done"],
+            resume_existing=False,
+        )
+        (tmp_path / "config.yaml").write_text("model: test\niters: 100\nseed: 42\nsave_every: 10\n")
+        (tmp_path / "data" / "test_expert").mkdir(parents=True)
+
+        receipt: dict = {"experts": {}}
+
+        with mock.patch("train_nan_safe.run_training_attempt") as mock_run:
+            mock_run.return_value = {
+                "status": "completed",
+                "nan_detected": False,
+                "resume_from_iter": 0,
+                "best_logged_val_loss": 2.1,
+                "finished_at": "2026-01-01T00:00:00+00:00",
+            }
+            result = train_one_expert(
+                expert="test_expert",
+                args=args,
+                base_config={"iters": 100, "seed": 42, "save_every": 10},
+                receipt=receipt,
+                workspace=tmp_path / "workspace",
+            )
+
+        assert result["status"] == "completed"
+        assert result["final_val_loss"] == 2.1
+
+
 class TestMaxRetries:
     def test_max_retries_respected(self, tmp_path):
         """Verify that the main loop respects max_seed_attempts."""

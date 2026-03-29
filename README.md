@@ -5,18 +5,18 @@ Automatic NaN/Inf detection and checkpoint recovery for LoRA fine-tuning on Appl
 ## The Problem
 
 When fine-tuning language models with LoRA on Apple Silicon using MLX, training runs
-frequently diverge — the loss becomes NaN or Inf, corrupting model weights from that
-point forward. This is especially common with 4-bit quantized models where gradient
-accumulation amplifies numerical instability.
+can diverge — the loss becomes NaN or Inf, corrupting model weights from that point
+forward. This is especially common with 4-bit quantized models under gradient
+accumulation.
 
 The standard workflow: watch the terminal, ctrl-C when you see NaN, find the last good
 checkpoint, change the random seed, restart manually. At 3am on a long training run,
 nobody is watching.
 
-Related issues in the MLX ecosystem:
+Related discussions in the MLX ecosystem:
 - [mlx-examples #620](https://github.com/ml-explore/mlx-examples/issues/620) — NaN training/validation loss
 - [mlx-lm #361](https://github.com/ml-explore/mlx-lm/issues/361) — NaN values during fine-tuning
-- [mlx-lm discussion #636](https://github.com/ml-explore/mlx-lm/discussions/636) — Ideas to debug NaN
+- [mlx-lm discussion #636](https://github.com/ml-explore/mlx-lm/discussions/636) — Debugging NaN
 
 ## How It Works
 

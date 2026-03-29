@@ -404,7 +404,15 @@ def train_one_expert(
             expert_receipt["seed_used"] = current_seed
             expert_receipt["best_checkpoint_iter"] = target_iters
             expert_receipt["resume_checkpoint_iter"] = attempt["resume_from_iter"]
-            expert_receipt["status"] = "completed"
+            best_val = attempt.get("best_logged_val_loss")
+            if best_val is not None and best_val >= args.threshold:
+                expert_receipt["status"] = "failed"
+                expert_receipt["failure_reason"] = (
+                    f"best val_loss {best_val:.3f} did not beat threshold {args.threshold:.3f}"
+                )
+            else:
+                expert_receipt["status"] = "completed"
+            expert_receipt["final_val_loss"] = best_val
             expert_receipt["finished_at"] = now_iso()
             return expert_receipt
 
