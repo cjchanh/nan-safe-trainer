@@ -1,0 +1,20 @@
+[project]
+name = "nan-safe-trainer"
+version = "0.1.0"
+description = "Automatic NaN detection and checkpoint recovery for MLX LoRA training"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.10"
+keywords = ["mlx", "apple-silicon", "lora", "training", "nan", "machine-learning", "fine-tuning"]
+dependencies = ["pyyaml>=6.0"]
+
+[project.urls]
+Homepage = "https://github.com/cjchanh/nan-safe-trainer"
+Issues = "https://github.com/cjchanh/nan-safe-trainer/issues"
+
+[project.optional-dependencies]
+dev = ["pytest>=7.0"]
+
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"

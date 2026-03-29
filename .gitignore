@@ -1,0 +1,15 @@
+__pycache__/
+*.pyc
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+*.npz
+*.safetensors
+adapters/
+data/
+evidence/
+*.pem
+*.env
+.DS_Store
+nan_safe_receipt.json
