@@ -62,11 +62,10 @@ When NaN or Inf appears in the loss value, the wrapper:
 ## Installation
 
 ```bash
-pip install pyyaml  # only runtime dependency for the wrapper
-pip install mlx mlx-lm  # for actually running training
+pip install nan-safe-trainer
 ```
 
-Or clone and install dev dependencies:
+Or from source:
 
 ```bash
 git clone https://github.com/cjchanh/nan-safe-trainer.git
@@ -74,16 +73,28 @@ cd nan-safe-trainer
 pip install -e ".[dev]"
 ```
 
+You also need MLX for the actual training:
+
+```bash
+pip install mlx mlx-lm
+```
+
 ## Usage
 
 ```bash
-python train_nan_safe.py \
+nan-safe-train \
   --config examples/example_config.yaml \
   --experts my_expert_a my_expert_b \
   --data-dir ./data \
   --adapter-dir ./adapters \
   --max-seed-attempts 5 \
   --save-every 30
+```
+
+Or run as a module:
+
+```bash
+python -m nan_safe_trainer --config config.yaml --experts my_expert --data-dir ./data
 ```
 
 ### Arguments
@@ -120,7 +131,7 @@ By default, the wrapper calls `python -m mlx_lm.lora --config <temp_config>`. If
 use a custom training script, pass it via `--trainer-cmd`:
 
 ```bash
-python train_nan_safe.py \
+nan-safe-train \
   --config config.yaml \
   --experts my_expert \
   --data-dir ./data \
@@ -175,27 +186,26 @@ Every run writes a structured JSON receipt documenting:
 
 ## Companion Tools
 
-### filter_nan_rows.py
+### filter
 
 Pre-filters training data by running a forward pass on each row and removing
 any that produce NaN loss. Use this before training to clean your dataset:
 
-```bash
-python filter_nan_rows.py \
-  --model Qwen/Qwen3-32B-MLX-4bit \
-  --input data/expert_a/train.jsonl \
-  --output data/expert_a/train_clean.jsonl
+```python
+from nan_safe_trainer.filter import main as filter_main
+# Or run directly:
+# python -c "from nan_safe_trainer.filter import main; main()" --model ... --input ... --output ...
 ```
 
 Requires `mlx` and `mlx-lm`.
 
-### metal_init.py
+### metal
 
 Metal GPU memory governance for MLX. Import before loading models to set
 memory and cache limits by profile (`training`, `inference`, `light`):
 
 ```python
-from metal_init import init_metal
+from nan_safe_trainer.metal import init_metal
 init_metal(profile="training")  # 80GB memory, 4GB cache
 ```
 

@@ -16,8 +16,14 @@ dependencies = ["pyyaml>=6.0"]
 Homepage = "https://github.com/cjchanh/nan-safe-trainer"
 Issues = "https://github.com/cjchanh/nan-safe-trainer/issues"
 
+[project.scripts]
+nan-safe-train = "nan_safe_trainer.cli:run"
+
 [project.optional-dependencies]
 dev = ["pytest>=7.0"]
 
-[tool.setuptools]
-py-modules = ["train_nan_safe", "metal_init", "filter_nan_rows"]
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

@@ -13,7 +13,7 @@ from unittest import mock
 
 import pytest
 
-from train_nan_safe import (
+from nan_safe_trainer.core import (
     CHECKPOINT_RE,
     TRAIN_LOSS_RE,
     VAL_LOSS_RE,
@@ -204,7 +204,7 @@ class TestThresholdGating:
     def test_threshold_gates_completion(self, tmp_path):
         """Training completes but val loss exceeds threshold → status=failed."""
         import argparse
-        from train_nan_safe import train_one_expert
+        from nan_safe_trainer.core import train_one_expert
 
         args = argparse.Namespace(
             config=tmp_path / "config.yaml",
@@ -224,7 +224,7 @@ class TestThresholdGating:
 
         receipt: dict = {"experts": {}}
 
-        with mock.patch("train_nan_safe.run_training_attempt") as mock_run:
+        with mock.patch("nan_safe_trainer.core.run_training_attempt") as mock_run:
             mock_run.return_value = {
                 "status": "completed",
                 "nan_detected": False,
@@ -246,7 +246,7 @@ class TestThresholdGating:
     def test_threshold_passes_when_under(self, tmp_path):
         """Training completes with val loss under threshold → status=completed."""
         import argparse
-        from train_nan_safe import train_one_expert
+        from nan_safe_trainer.core import train_one_expert
 
         args = argparse.Namespace(
             config=tmp_path / "config.yaml",
@@ -266,7 +266,7 @@ class TestThresholdGating:
 
         receipt: dict = {"experts": {}}
 
-        with mock.patch("train_nan_safe.run_training_attempt") as mock_run:
+        with mock.patch("nan_safe_trainer.core.run_training_attempt") as mock_run:
             mock_run.return_value = {
                 "status": "completed",
                 "nan_detected": False,
@@ -312,12 +312,12 @@ class TestMaxRetries:
         # Create data dir
         (tmp_path / "data" / "test_expert").mkdir(parents=True)
 
-        from train_nan_safe import train_one_expert
+        from nan_safe_trainer.core import train_one_expert
 
         receipt: dict = {"experts": {}}
 
         # Mock run_training_attempt to always return nan_detected with no checkpoint
-        with mock.patch("train_nan_safe.run_training_attempt") as mock_run:
+        with mock.patch("nan_safe_trainer.core.run_training_attempt") as mock_run:
             mock_run.return_value = {
                 "status": "nan_detected",
                 "nan_detected": True,
