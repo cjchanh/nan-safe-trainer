@@ -190,10 +190,13 @@ The package also includes optional utilities (not part of the core training loop
 
 ```bash
 make install   # pip install -e ".[dev]"
-make test      # pytest
-make build     # wheel + sdist
+make test      # install + pytest (28 tests)
+make build     # install + build wheel + sdist
 make check     # build + twine check
+make clean     # remove build artifacts
 ```
+
+All targets bootstrap their own dependencies. `make test` from a fresh venv just works.
 
 ## What This Does NOT Do
 

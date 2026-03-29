@@ -56,6 +56,7 @@ class ExpertResult:
     finished_at: str | None = None
     seed_used: int | None = None
     best_checkpoint_iter: int | None = None
+    resume_checkpoint_iter: int | None = None
     final_val_loss: float | None = None
     failure_reason: str | None = None
 
