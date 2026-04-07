@@ -40,6 +40,9 @@ def run_nan_safe(tmp_path: Path, *, experts: list[str], nan_at_iter: int = 0,
 
     receipt_path = tmp_path / "receipt.json"
     env = dict(os.environ)
+    # Ensure src-layout package is discoverable by subprocess
+    src_dir = str(Path(__file__).resolve().parent.parent / "src")
+    env["PYTHONPATH"] = src_dir + os.pathsep + env.get("PYTHONPATH", "")
     if nan_at_iter > 0:
         env["NAN_AT_ITER"] = str(nan_at_iter)
     else:
