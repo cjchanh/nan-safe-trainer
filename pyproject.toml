@@ -9,11 +9,13 @@ description = "Automatic NaN detection and checkpoint recovery for MLX LoRA trai
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.10"
+authors = [{name = "Christopher Chanhnourack"}]
 keywords = ["mlx", "apple-silicon", "lora", "training", "nan", "machine-learning", "fine-tuning"]
 dependencies = ["pyyaml>=6.0"]
 
 [project.urls]
 Homepage = "https://github.com/cjchanh/nan-safe-trainer"
+Repository = "https://github.com/cjchanh/nan-safe-trainer"
 Issues = "https://github.com/cjchanh/nan-safe-trainer/issues"
 
 [project.scripts]
