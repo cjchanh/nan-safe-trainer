@@ -1,3 +1,6 @@
+[![CI](https://github.com/cjchanh/nan-safe-trainer/actions/workflows/ci.yml/badge.svg)](https://github.com/cjchanh/nan-safe-trainer/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
 # nan-safe-trainer
 
 Automatic NaN/Inf detection and checkpoint recovery for LoRA fine-tuning on Apple Silicon.
