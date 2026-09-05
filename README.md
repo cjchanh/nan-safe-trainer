@@ -137,6 +137,13 @@ nan-safe-train \
 
 Your trainer must accept `--config <path>` and print loss in the standard MLX format.
 
+## Testing
+
+The test suite (`pytest`) is fully mocked: it exercises the NaN detection, retry, and
+config-rewrite logic without importing MLX or running a training step, so it passes on any
+machine and in CI. The real MLX training path is verified manually on Apple Silicon and is
+**not** exercised by CI; treat "tests green" as coverage of the wrapper logic only.
+
 ## Receipt Format
 
 Every run writes a structured JSON receipt documenting:
