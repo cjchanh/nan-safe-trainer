@@ -3,7 +3,16 @@
 
 # nan-safe-trainer
 
-Automatic NaN/Inf detection and checkpoint recovery for LoRA fine-tuning on Apple Silicon.
+Watches an MLX LoRA training run on Apple Silicon, stops it when loss goes NaN or Inf, and restarts from the last good checkpoint with a new seed.
+
+**Install:** `pip install -e .` then `pip install mlx mlx-lm` for real training.
+
+**Example:**
+```bash
+nan-safe-train --config examples/example_config.yaml --experts my_expert --data-dir ./data
+```
+
+**Refuses:** does not fix why NaN happens, does not ship weights or training data, and does not call the cloud.
 
 ## The Problem
 
@@ -139,14 +148,15 @@ Your trainer must accept `--config <path>` and print loss in the standard MLX fo
 
 ## Testing
 
-The test suite (`pytest`) is fully mocked: it exercises the NaN detection, retry, and
-config-rewrite logic without importing MLX or running a training step, so it passes on any
-machine and in CI. The real MLX training path is verified manually on Apple Silicon and is
-**not** exercised by CI; treat "tests green" as coverage of the wrapper logic only.
+The default suite (`pytest`) is mocked: it exercises NaN detection, retry, and
+config-rewrite logic without importing MLX, so it passes on any machine. CI also
+runs a `macos-latest` smoke job that installs `mlx` and executes
+`tests/test_mlx_smoke.py` — one real MLX training step. That test skips when
+`mlx` is absent.
 
-## Receipt Format
+## Run record
 
-Every run writes a structured JSON receipt documenting:
+Every run writes a structured JSON record (`--receipt-path`, default `./nan_safe_receipt.json`):
 
 ```json
 {
@@ -200,7 +210,7 @@ The package also includes optional utilities (not part of the core training loop
 
 ```bash
 make install   # pip install -e ".[dev]"
-make test      # install + pytest (28 tests)
+make test      # install + pytest (28 mocked + 1 mlx smoke when mlx is present)
 make build     # install + build wheel + sdist
 make check     # build + twine check
 make clean     # remove build artifacts
