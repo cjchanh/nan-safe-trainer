@@ -1,0 +1,48 @@
+{
+  "repo_notes": [
+    {
+      "content": "nan-safe-trainer is a small Python supervisor for MLX LoRA fine-tuning on Apple Silicon: it watches a training subprocess' stdout for NaN/Inf loss, SIGTERMs the run on divergence, restores the last good checkpoint, bumps the random seed, and restarts — up to --max-seed-attempts per expert. Design law: fail closed and stay local. It does not diagnose why NaN happens, does not ship weights or data, and makes no cloud calls. A JSON receipt records the outcome; --threshold is fail-closed (a run with no logged val loss fails).",
+      "author": "Devin"
+    },
+    {
+      "content": "Layout is tiny: the whole package is src/nan_safe_trainer/ — cli.py (argparse entrypoint, also reachable via __main__.py and the nan-safe-train console script), core.py (subprocess spawn/monitor/restart loop), filter.py (regex parsing of MLX loss lines like 'Iter 10: Train loss 2.345'), metal.py (Apple-Silicon-specific helpers), receipt.py (JSON run receipt). tests/ has fake_trainer.py (a stand-in trainer emitting scripted loss lines) plus test_nan_safe.py, test_integration.py and test_mlx_smoke.py. examples/example_config.yaml is a sample MLX LoRA config. AGENTS.md, SECURITY.md, Makefile and pyproject.toml are first-class docs/config. Prioritize the monitor->kill->checkpoint->reseed loop; there is little else.",
+      "author": "Devin"
+    },
+    {
+      "content": "Vocabulary: 'expert' (one named LoRA adapter target trained from <data-dir>/<expert>/{train,valid}.jsonl), 'seed attempt' (one training try; each NaN restart increments seed by 1), 'checkpoint backup' (last good adapter dir copied to a workspace before resume), 'receipt' (JSON verdict written to --receipt-path), 'fail-closed threshold' (validation-loss gate that fails when val loss was never logged). AGENTS.md and SECURITY.md state the operating contract and trust boundary; README.md documents every CLI flag accurately.",
+      "author": "Devin"
+    }
+  ],
+  "pages": [
+    {
+      "title": "Overview",
+      "purpose": "Explain what nan-safe-trainer supervises (MLX LoRA runs on Apple Silicon), the NaN/Inf divergence problem it automates away, and its explicit non-goals: no root-cause fix, no shipped weights/data, no cloud calls.",
+      "parent": null
+    },
+    {
+      "title": "Getting Started",
+      "purpose": "Cover install (pip install -e . plus mlx/mlx-lm), the nan-safe-train CLI and every flag from README.md (--config, --experts, --data-dir, --adapter-dir, --save-every, --max-seed-attempts, --threshold, --seed, --receipt-path, --trainer-cmd, --resume-existing), and examples/example_config.yaml.",
+      "parent": "Overview"
+    },
+    {
+      "title": "Recovery Loop Invariants",
+      "purpose": "Document the supervisor loop in src/nan_safe_trainer/core.py: spawn, line-by-line stdout monitoring via filter.py loss regexes, SIGTERM on NaN/Inf, last-good-checkpoint backup, seed increment, resume_adapter_file restart, and the fail-closed --threshold / receipt semantics in receipt.py.",
+      "parent": "Overview"
+    },
+    {
+      "title": "Loss Parsing and Metal Helpers",
+      "purpose": "Detail src/nan_safe_trainer/filter.py (the exact MLX stdout formats it matches — Train loss, Val loss, Tokens-per-sec lines) and src/nan_safe_trainer/metal.py (Apple Silicon specifics), including what output shapes are unrecognized.",
+      "parent": null
+    },
+    {
+      "title": "CLI and Receipt",
+      "purpose": "Cover src/nan_safe_trainer/cli.py and __main__.py argument surface, the console-script entry point, and the JSON receipt written by receipt.py — its fields, verdicts and --receipt-path default.",
+      "parent": null
+    },
+    {
+      "title": "Testing and CI",
+      "purpose": "Document tests/fake_trainer.py (scripted loss emitter used as the subprocess), test_nan_safe.py, test_integration.py and test_mlx_smoke.py, the Makefile targets, and .github/workflows/ci.yml.",
+      "parent": null
+    }
+  ]
+}
